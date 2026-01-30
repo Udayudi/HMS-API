@@ -1,3 +1,17 @@
 spring:
   application:
     name: hms
+  profiles:
+    active: dev
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    '[com.global.hms]' : DEBUG

@@ -1,0 +1,65 @@
+-- Create users and roles tables
+CREATE TABLE roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE hospitals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    hospital_uuid VARCHAR(36) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    pincode VARCHAR(20),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    is_nabh_accredited BOOLEAN DEFAULT FALSE,
+    hospital_type ENUM('CLINIC', 'HOSPITAL', 'MULTISPECIALITY', 'SUPERSPECIALITY') DEFAULT 'HOSPITAL',
+    registration_number VARCHAR(100),
+    status ENUM('ACTIVE', 'INACTIVE', 'PENDING') DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE hospital_users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_uuid VARCHAR(36) NOT NULL UNIQUE,
+    hospital_id BIGINT NOT NULL,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    is_locked BOOLEAN DEFAULT FALSE,
+    last_login TIMESTAMP NULL,
+    failed_login_attempts INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE
+);
+
+CREATE TABLE user_roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES hospital_users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_role (user_id, role_id)
+);
+
+CREATE TABLE refresh_tokens (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
+    expiry_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES hospital_users(id) ON DELETE CASCADE
+);
